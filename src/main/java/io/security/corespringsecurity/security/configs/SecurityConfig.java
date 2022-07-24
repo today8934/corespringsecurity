@@ -1,5 +1,6 @@
 package io.security.corespringsecurity.security.configs;
 
+import io.security.corespringsecurity.security.handler.CustomAccessDeniedHandler;
 import io.security.corespringsecurity.security.provider.CustomAuthenticationProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
@@ -15,8 +16,12 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.WebAuthenticationDetails;
+
+import javax.servlet.http.HttpServletRequest;
 
 @Configuration
 @EnableWebSecurity
@@ -24,23 +29,19 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final UserDetailsService userDetailsService;
-    private final AuthenticationDetailsSource authenticationDetailsSource;
+    private final AuthenticationDetailsSource<HttpServletRequest, WebAuthenticationDetails> authenticationDetailsSource;
     private final AuthenticationSuccessHandler authenticationSuccessHandler;
     private final AuthenticationFailureHandler authenticationFailureHandler;
+    private final AccessDeniedHandler accessDeniedHandler;
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) {
         auth.authenticationProvider(authenticationProvider());
     }
 
-    @Bean
-    public AuthenticationProvider authenticationProvider() {
-        return new CustomAuthenticationProvider(userDetailsService, passwordEncoder());
-    }
-
     /*
-            정적 파일들이 보안필터를 거치지 않도록 하는 설정
-         */
+        정적 파일들이 보안필터를 거치지 않도록 하는 설정
+     */
     @Override
     public void configure(WebSecurity web) {
         web.
@@ -66,7 +67,23 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 defaultSuccessUrl("/").
                 successHandler(authenticationSuccessHandler).
                 failureHandler(authenticationFailureHandler).
-                permitAll();
+                permitAll().
+            and().
+                exceptionHandling().
+                accessDeniedHandler(accessDeniedHandler());
+    }
+
+    @Bean
+    public AccessDeniedHandler accessDeniedHandler() {
+        CustomAccessDeniedHandler customAccessDeniedHandler =
+                (CustomAccessDeniedHandler) accessDeniedHandler;
+        customAccessDeniedHandler.setErrorPage("/denied");
+        return customAccessDeniedHandler;
+    }
+
+    @Bean
+    public AuthenticationProvider authenticationProvider() {
+        return new CustomAuthenticationProvider(userDetailsService, passwordEncoder());
     }
 
     @Bean
