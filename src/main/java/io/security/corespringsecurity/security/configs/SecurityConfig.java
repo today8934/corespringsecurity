@@ -35,7 +35,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             AuthenticationDetailsSource<HttpServletRequest, WebAuthenticationDetails> authenticationDetailsSource,
             @Qualifier("customAuthenticationSuccessHandler") AuthenticationSuccessHandler authenticationSuccessHandler,
             @Qualifier("customAuthenticationFailureHandler") AuthenticationFailureHandler authenticationFailureHandler,
-            AccessDeniedHandler accessDeniedHandler,
+            @Qualifier("customAccessDeniedHandler") AccessDeniedHandler accessDeniedHandler,
             @Qualifier("customAuthenticationProvider") AuthenticationProvider authenticationProvider) {
         this.authenticationDetailsSource = authenticationDetailsSource;
         this.authenticationSuccessHandler = authenticationSuccessHandler;
