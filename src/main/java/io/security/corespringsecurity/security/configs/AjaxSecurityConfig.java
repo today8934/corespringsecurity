@@ -60,8 +60,6 @@ public class AjaxSecurityConfig extends WebSecurityConfigurerAdapter {
                 exceptionHandling().
                 authenticationEntryPoint(authenticationEntryPoint).
                 accessDeniedHandler(accessDeniedHandler);
-
-        http.csrf().disable();
     }
 
     @Bean
